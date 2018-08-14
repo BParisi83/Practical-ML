@@ -34,7 +34,7 @@ ctraindata <- ctraindata[-c(1:7)]
 
 #Training and testing split
 We will split the data 60% into the training set and then 40% into the testing set. 
-```{r}
+```{r, echo= TRUE}
 inTrain <- createDataPartition(ctraindata$classe, p=.60, list = FALSE)
 training <- ctraindata[inTrain,]
 testing <- ctraindata[-inTrain,]
@@ -46,7 +46,7 @@ dim(training)
 We will see from the confusion matrix that we have an error rate of less than 1%. The method created 500 trees and used 27 variables of the 52 predictor in the data set. Durint he random forest method I used a 4 fold cross validation method which has provided very good results. 
 
 
-```{r}
+```{r, echo= TRUE}
 RFModel <- train(classe ~ ., data=training, method="rf", trControl=trainControl(method ='cv', number=4))
 RFModel
 
@@ -57,7 +57,7 @@ confusionMatrix(predictions, testing$classe)
 ```
 
 #Test results
-```{r}
+```{r, echo= TRUE}
 test <- predict(RFModel, newdata = testdata)
 test
 ```
