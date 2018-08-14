@@ -1,0 +1,66 @@
+---
+title: "PML Project"
+author: "B Parisi"
+date: "August 14, 2018"
+output: html_document
+---
+
+
+```{r}
+library(AppliedPredictiveModeling)
+library(caret)
+library(rattle)
+library(rpart.plot)
+library(randomForest)
+```
+
+#Introduction of the Problem
+"The goal of your project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. You may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases." https://www.coursera.org/learn/practical-machine-learning/supplement/PvInj/course-project-instructions-read-first
+
+```{r}
+set.seed(1852)
+traindata <- read.csv('C:/Users/BParisi/Documents/R/Practice Projects/pml-training.csv', na.strings=c('NA', ""))
+testdata <-read.csv('C:/Users/BParisi/Documents/R/Practice Projects/pml-testing.csv', na.strings = c('NA', ''))
+```
+
+#Data Wrangling
+We know this data is not clean there exist many NAs and there are 160 columns. Lets use some functions to remove columns with majority NAs. You need to evaluate both with the same dataframe in the is.na() function or else you could have different columns existing in both. That would be counter productive. We have now reduced the data set to 58. We are removing the first 7 columns as well. 
+
+```{r}
+ctraindata<- traindata[, colSums(is.na(traindata)) == 0]
+
+ctraindata <- ctraindata[-c(1:7)]
+```
+
+#Training and testing split
+We will split the data 60% into the training set and then 40% into the testing set. 
+```{r}
+inTrain <- createDataPartition(ctraindata$classe, p=.60, list = FALSE)
+training <- ctraindata[inTrain,]
+testing <- ctraindata[-inTrain,]
+
+dim(training)
+```
+
+#Random Forest Model and Data Analysis
+We will see from the confusion matrix that we have an error rate of less than 1%. The method created 500 trees and used 27 variables of the 52 predictor in the data set. Durint he random forest method I used a 4 fold cross validation method which has provided very good results. 
+
+
+```{r}
+RFModel <- train(classe ~ ., data=training, method="rf", trControl=trainControl(method ='cv', number=4))
+RFModel
+
+RFModel$finalModel
+
+predictions <- predict(RFModel, newdata=testing)
+confusionMatrix(predictions, testing$classe)
+```
+
+#Test results
+```{r}
+test <- predict(RFModel, newdata = testdata)
+test
+```
+
+
+
